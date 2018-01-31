@@ -24,7 +24,7 @@ import org.apache.tools.ant.BuildException;
 import net.wasdev.wlp.ant.install.ProductInfo;
 
 /**
- * product info task
+ * Product info task.
  */
 public class ProductInfoTask extends AbstractTask {
 
