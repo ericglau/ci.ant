@@ -108,13 +108,13 @@ public class ProductInfoTest {
         
         String productId = productInfoList.get(0).getProductId();
         String version = productInfoList.get(0).getProductVersion();
-        Assert.assertEquals("example.product.id", productId);
-        Assert.assertEquals("1.0.0", version);
+        Assert.assertEquals("com.ibm.websphere.appserver", productId);
+        Assert.assertEquals("17.0.0.4", version);
         
         productId = productInfoList.get(1).getProductId();
         version = productInfoList.get(1).getProductVersion();
-        Assert.assertEquals("com.ibm.websphere.appserver", productId);
-        Assert.assertEquals("17.0.0.4", version);
+        Assert.assertEquals("example.extension", productId);
+        Assert.assertEquals("1.0.0", version);
     }
 
     private ProductInfoTask createTask() {
