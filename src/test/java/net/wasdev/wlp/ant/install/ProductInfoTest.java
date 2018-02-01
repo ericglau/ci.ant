@@ -15,7 +15,11 @@
  */
 package net.wasdev.wlp.ant.install;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -69,15 +73,48 @@ public class ProductInfoTest {
     }
 
     @Test
-    public void testBasicCompile() throws URISyntaxException {
+    public void testProductInfoTask() throws URISyntaxException {
         ProductInfoTask task = createTask();
         task.execute();
 
         List<ProductInfo> productInfoList = task.getProductInfoList();
         String productId = productInfoList.get(0).getProductId();
-        ProductVersion version = productInfoList.get(0).getProductVersion();
+        String version = productInfoList.get(0).getProductVersion();
         Assert.assertEquals("com.ibm.websphere.appserver", productId);
-        Assert.assertTrue("productVersion should be greater than or equal to 17.0.0.4", version.compareTo(ProductVersion.parseVersion("17.0.0.4")) >= 0);
+        Assert.assertNotNull("version should not be null", version);
+    }
+    
+    @Test
+    public void testParseProductInfo() throws URISyntaxException, IOException {
+        
+        URI url = ProductInfoTest.class.getResource("/productInfoOutput.txt").toURI();
+        File testFile = new File(url);
+        Assert.assertTrue(testFile.exists());
+
+        String content = null;
+        BufferedReader reader = new BufferedReader(new FileReader(testFile));
+        try {
+            StringBuilder builder = new StringBuilder();
+            for (String line; (line = reader.readLine()) != null; ) {
+                builder.append(line).append(System.lineSeparator());
+            }
+            content = builder.toString();
+        } finally {
+            reader.close();
+        }
+        
+        List<ProductInfo> productInfoList = ProductInfo.parseProductInfo(content);
+        Assert.assertEquals(2, productInfoList.size());
+        
+        String productId = productInfoList.get(0).getProductId();
+        String version = productInfoList.get(0).getProductVersion();
+        Assert.assertEquals("example.product.id", productId);
+        Assert.assertEquals("1.0.0", version);
+        
+        productId = productInfoList.get(1).getProductId();
+        version = productInfoList.get(1).getProductVersion();
+        Assert.assertEquals("com.ibm.websphere.appserver", productId);
+        Assert.assertEquals("17.0.0.4", version);
     }
 
     private ProductInfoTask createTask() {

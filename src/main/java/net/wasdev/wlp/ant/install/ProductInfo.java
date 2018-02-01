@@ -32,8 +32,8 @@ public class ProductInfo {
         this.productId = productId;
     }
 
-    public ProductVersion getProductVersion() {
-        return ProductVersion.parseVersion(productVersion);
+    public String getProductVersion() {
+        return productVersion;
     }
     
     public String getProductId() {
@@ -44,23 +44,33 @@ public class ProductInfo {
         List<ProductInfo> result = new ArrayList<ProductInfo>();
 
         BufferedReader productInfoReader = new BufferedReader(new StringReader(productInfo));
-        for (String line; (line = productInfoReader.readLine()) != null;) {
-            if (line.trim().endsWith(":")) {
-                StringBuilder builder = new StringBuilder();
-                // start properties section
-                for (String propertiesLine; (propertiesLine = productInfoReader.readLine()) != null
-                        && !propertiesLine.endsWith(":");) {
-                    builder.append(propertiesLine).append(System.lineSeparator());
+        try {
+            String line = productInfoReader.readLine();
+            while (line != null) {
+                if (line.trim().endsWith(":")) {
+                    StringBuilder builder = new StringBuilder();
+                    // start properties section
+                    line = productInfoReader.readLine();
+                    while (line != null && !line.trim().endsWith(":")) {
+                        builder.append(line).append(System.lineSeparator());
+                        line = productInfoReader.readLine();
+                    }
+                    // store properties
+                    BufferedReader propertiesReader = new BufferedReader(new StringReader(builder.toString()));
+                    try {
+                        Properties properties = new Properties();
+                        properties.load(propertiesReader);
+                        // get relevant properties
+                        String productId = properties.getProperty("com.ibm.websphere.productId");
+                        String productVersion = properties.getProperty("com.ibm.websphere.productVersion");
+                        result.add(new ProductInfo(productVersion, productId));
+                    } finally {
+                        propertiesReader.close();
+                    }
                 }
-                // store properties
-                BufferedReader propertiesReader = new BufferedReader(new StringReader(builder.toString()));
-                Properties properties = new Properties();
-                properties.load(propertiesReader);
-                // get relevant properties
-                String productId = properties.getProperty("com.ibm.websphere.productId");
-                String productVersion = properties.getProperty("com.ibm.websphere.productVersion");
-                result.add(new ProductInfo(productVersion, productId));
             }
+        } finally {
+            productInfoReader.close();
         }
         return result;
     }
