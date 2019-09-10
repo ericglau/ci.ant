@@ -23,6 +23,7 @@ import java.net.URLClassLoader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -83,6 +84,8 @@ public class ServerTask extends AbstractTask {
    
     // used with 'package' operation
     private String os;
+
+    private Map<String, String> environmentVariables;
     
     @Override
     protected void initTask() {
@@ -107,6 +110,11 @@ public class ServerTask extends AbstractTask {
         processBuilder.directory(installDir);
         processBuilder.environment().put("JAVA_HOME", javaHome);
         processBuilder.redirectErrorStream(true);
+
+        // Set extra environment variables
+        if (environmentVariables != null) {
+            processBuilder.environment().putAll(environmentVariables);
+        }
     }
 
     @Override
@@ -618,6 +626,10 @@ public class ServerTask extends AbstractTask {
         public int getValue() {
             return val;
         }
+    }
+
+    public void setEnvironmentVariables(Map<String, String> environmentVariables) {
+        this.environmentVariables = environmentVariables;
     }
 
 }
